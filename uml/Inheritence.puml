@@ -56,13 +56,13 @@ class MobEnemy {
 AbstractAircraft <|-- MobEnemy
 
 class EliteEnemy {
-    - shootFrequency:int
-    - shootTimer:int
+    - shootNum:int
+    - power:int
+    - direction:int
 
     + EliteEnemy(int locationX, int locationY, int speedX, int speedY, int hp)
     + forward():void
     + shoot():List<BaseBullet>
-    + setShootFrequency(int frequency):void
 }
 AbstractAircraft <|-- EliteEnemy
 
@@ -84,8 +84,6 @@ class BombProp {
 }
 
 class BloodProp {
-    - healAmount:int
-
     + BloodProp(int locationX, int locationY, int speedX, int speedY)
     + activate(HeroAircraft hero):void
 }

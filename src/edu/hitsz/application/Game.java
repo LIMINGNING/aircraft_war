@@ -3,7 +3,7 @@ package edu.hitsz.application;
 import edu.hitsz.aircraft.*;
 import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.basic.AbstractFlyingObject;
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+import edu.hitsz.prop.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,6 +35,7 @@ public class Game extends JPanel {
     private final List<AbstractAircraft> enemyAircrafts;
     private final List<BaseBullet> heroBullets;
     private final List<BaseBullet> enemyBullets;
+    private final List<AbstractProp> props;
 
     /**
      * 屏幕中出现的敌机最大数量
@@ -65,22 +66,20 @@ public class Game extends JPanel {
     public Game() {
         heroAircraft = new HeroAircraft(
                 Main.WINDOW_WIDTH / 2,
-                Main.WINDOW_HEIGHT - ImageManager.HERO_IMAGE.getHeight() ,
+                Main.WINDOW_HEIGHT - ImageManager.HERO_IMAGE.getHeight(),
                 0, 0, 100);
 
         enemyAircrafts = new LinkedList<>();
         heroBullets = new LinkedList<>();
         enemyBullets = new LinkedList<>();
+        props = new LinkedList<>();
 
         /**
          * Scheduled 线程池，用于定时任务调度
-         * 关于alibaba code guide：可命名的 ThreadFactory 一般需要第三方包
-         * apache 第三方库： org.apache.commons.lang3.concurrent.BasicThreadFactory
          */
-        this.executorService = new ScheduledThreadPoolExecutor(1,
-                new BasicThreadFactory.Builder().namingPattern("game-action-%d").daemon(true).build());
+        this.executorService = new ScheduledThreadPoolExecutor(1);
 
-        //启动英雄机鼠标监听
+        // 启动英雄机鼠标监听
         new HeroController(this, heroAircraft);
 
     }
@@ -95,20 +94,28 @@ public class Game extends JPanel {
 
             time += timeInterval;
 
-
             // 周期性执行（控制频率）
             if (timeCountAndNewCycleJudge()) {
                 System.out.println(time);
                 // 新敌机产生
 
                 if (enemyAircrafts.size() < enemyMaxNumber) {
-                    enemyAircrafts.add(new MobEnemy(
-                            (int) (Math.random() * (Main.WINDOW_WIDTH - ImageManager.MOB_ENEMY_IMAGE.getWidth())),
-                            (int) (Math.random() * Main.WINDOW_HEIGHT * 0.05),
-                            0,
-                            10,
-                            30
-                    ));
+                    // 随机生成普通敌机或精英敌机
+                    if (Math.random() < 0.8) { // 80% 概率生成普通敌机
+                        enemyAircrafts.add(new MobEnemy(
+                                (int) (Math.random() * (Main.WINDOW_WIDTH - ImageManager.MOB_ENEMY_IMAGE.getWidth())),
+                                (int) (Math.random() * Main.WINDOW_HEIGHT * 0.05),
+                                0,
+                                10,
+                                30));
+                    } else { // 20% 概率生成精英敌机
+                        enemyAircrafts.add(new EliteEnemy(
+                                (int) (Math.random() * (Main.WINDOW_WIDTH - ImageManager.ELITE_ENEMY_IMAGE.getWidth())),
+                                (int) (Math.random() * Main.WINDOW_HEIGHT * 0.05),
+                                3, // 精英敌机可以有横向速度
+                                10,
+                                30));
+                    }
                 }
                 // 飞机射出子弹
                 shootAction();
@@ -120,13 +127,16 @@ public class Game extends JPanel {
             // 飞机移动
             aircraftsMoveAction();
 
+            // 道具移动
+            propsMoveAction();
+
             // 撞击检测
             crashCheckAction();
 
             // 后处理
             postProcessAction();
 
-            //每个时刻重绘界面
+            // 每个时刻重绘界面
             repaint();
 
             // 游戏结束检查英雄机是否存活
@@ -147,9 +157,9 @@ public class Game extends JPanel {
 
     }
 
-    //***********************
-    //      Action 各部分
-    //***********************
+    // ***********************
+    // Action 各部分
+    // ***********************
 
     private boolean timeCountAndNewCycleJudge() {
         cycleTime += timeInterval;
@@ -164,6 +174,9 @@ public class Game extends JPanel {
 
     private void shootAction() {
         // TODO 敌机射击
+        for (AbstractAircraft enemyAircraft : enemyAircrafts) {
+            enemyBullets.addAll(enemyAircraft.shoot());
+        }
 
         // 英雄射击
         heroBullets.addAll(heroAircraft.shoot());
@@ -184,6 +197,11 @@ public class Game extends JPanel {
         }
     }
 
+    private void propsMoveAction() {
+        for (AbstractProp prop : props) {
+            prop.forward();
+        }
+    }
 
     /**
      * 碰撞检测：
@@ -193,6 +211,21 @@ public class Game extends JPanel {
      */
     private void crashCheckAction() {
         // TODO 敌机子弹攻击英雄
+        for (BaseBullet bullet : enemyBullets) {
+            if (bullet.notValid()) {
+                continue;
+            }
+            if (heroAircraft.notValid()) {
+                // 英雄机已毁，不再检测
+                break;
+            }
+            if (heroAircraft.crash(bullet)) {
+                // 英雄机撞击到敌机子弹
+                // 英雄机损失一定生命值
+                heroAircraft.decreaseHp(bullet.getPower());
+                bullet.vanish();
+            }
+        }
 
         // 英雄子弹攻击敌机
         for (BaseBullet bullet : heroBullets) {
@@ -211,8 +244,14 @@ public class Game extends JPanel {
                     enemyAircraft.decreaseHp(bullet.getPower());
                     bullet.vanish();
                     if (enemyAircraft.notValid()) {
-                        // TODO 获得分数，产生道具补给
-                        score += 10;
+                        // 获得分数，产生道具补给
+                        if (enemyAircraft instanceof EliteEnemy) {
+                            score += 20; // 精英敌机分数更高
+                            // 精英敌机坠毁后随机产生道具
+                            generateProp(enemyAircraft.getLocationX(), enemyAircraft.getLocationY());
+                        } else {
+                            score += 10;
+                        }
                     }
                 }
                 // 英雄机 与 敌机 相撞，均损毁
@@ -223,7 +262,17 @@ public class Game extends JPanel {
             }
         }
 
-        // Todo: 我方获得道具，道具生效
+        // 我方获得道具，道具生效
+        for (AbstractProp prop : props) {
+            if (prop.notValid()) {
+                continue;
+            }
+            if (heroAircraft.crash(prop)) {
+                // 英雄机获得道具
+                prop.vanish();
+                prop.activate(heroAircraft);
+            }
+        }
 
     }
 
@@ -238,18 +287,18 @@ public class Game extends JPanel {
         enemyBullets.removeIf(AbstractFlyingObject::notValid);
         heroBullets.removeIf(AbstractFlyingObject::notValid);
         enemyAircrafts.removeIf(AbstractFlyingObject::notValid);
+        props.removeIf(AbstractFlyingObject::notValid);
     }
 
-
-    //***********************
-    //      Paint 各部分
-    //***********************
+    // ***********************
+    // Paint 各部分
+    // ***********************
 
     /**
      * 重写paint方法
      * 通过重复调用paint方法，实现游戏动画
      *
-     * @param  g
+     * @param g
      */
     @Override
     public void paint(Graphics g) {
@@ -270,10 +319,12 @@ public class Game extends JPanel {
 
         paintImageWithPositionRevised(g, enemyAircrafts);
 
+        paintImageWithPositionRevised(g, props);
+
         g.drawImage(ImageManager.HERO_IMAGE, heroAircraft.getLocationX() - ImageManager.HERO_IMAGE.getWidth() / 2,
                 heroAircraft.getLocationY() - ImageManager.HERO_IMAGE.getHeight() / 2, null);
 
-        //绘制得分和生命值
+        // 绘制得分和生命值
         paintScoreAndLife(g);
 
     }
@@ -301,5 +352,29 @@ public class Game extends JPanel {
         g.drawString("LIFE:" + this.heroAircraft.getHp(), x, y);
     }
 
+    /**
+     * 生成道具
+     * 
+     * @param x 道具的x坐标
+     * @param y 道具的y坐标
+     */
+    private void generateProp(int x, int y) {
+        double random = Math.random();
+        if (random < 0.8) { // 80% 概率生成道具
+            AbstractProp prop;
+            double propType = Math.random();
+            if (propType < 0.4) {
+                // 40% 概率生成加血道具
+                prop = new BloodProp(x, y, 0, 5);
+            } else if (propType < 0.7) {
+                // 30% 概率生成火力道具
+                prop = new FireProp(x, y, 0, 5);
+            } else {
+                // 30% 概率生成炸弹道具
+                prop = new BombProp(x, y, 0, 5);
+            }
+            props.add(prop);
+        }
+    }
 
 }

@@ -31,6 +31,7 @@ abstract class AbstractAircraft
     # hp:int
     + AbstractAircraft(int locationX, int locationY, int speedX, int speedY, int hp)
     + decreaseHp(int decrease):void
+    + increaseHp(int increase):void
     + getHp():int
     + {abstract} shoot():List<BaseBullet>
  }
@@ -43,7 +44,6 @@ class HeroAircraft {
     + HeroAircraft(int locationX, int locationY, int speedX, int speedY, int hp)
     + forward():void
     + shoot():List<BaseBullet>
-    + increaseHp(int increase):void
 }
 
 AbstractAircraft <|-- HeroAircraft

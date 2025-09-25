@@ -22,10 +22,6 @@ public class EliteEnemy extends AbstractAircraft {
     public void forward() {
         super.forward();
 
-        if (locationX <= 0.5 * ImageManager.ELITE_ENEMY_IMAGE.getWidth() || locationX >= Main.WINDOW_WIDTH - 0.5 * ImageManager.ELITE_ENEMY_IMAGE.getWidth()) {
-            speedX = -speedX;
-        }
-
         // 判定 y 轴向下飞行出界
         if (locationY >= Main.WINDOW_HEIGHT ) {
             vanish();

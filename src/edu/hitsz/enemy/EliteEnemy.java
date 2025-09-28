@@ -1,10 +1,9 @@
-package edu.hitsz.aircraft;
+package edu.hitsz.enemy;
 
-import edu.hitsz.application.ImageManager;
+import edu.hitsz.aircraft.AbstractAircraft;
 import edu.hitsz.application.Main;
 import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.bullet.EnemyBullet;
-import edu.hitsz.bullet.HeroBullet;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -21,10 +20,6 @@ public class EliteEnemy extends AbstractAircraft {
     @Override
     public void forward() {
         super.forward();
-
-        if (locationX <= 0.5 * ImageManager.ELITE_ENEMY_IMAGE.getWidth() || locationX >= Main.WINDOW_WIDTH - 0.5 * ImageManager.ELITE_ENEMY_IMAGE.getWidth()) {
-            speedX = -speedX;
-        }
 
         // 判定 y 轴向下飞行出界
         if (locationY >= Main.WINDOW_HEIGHT ) {

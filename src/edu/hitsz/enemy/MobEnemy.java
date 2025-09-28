@@ -1,5 +1,6 @@
-package edu.hitsz.aircraft;
+package edu.hitsz.enemy;
 
+import edu.hitsz.aircraft.AbstractAircraft;
 import edu.hitsz.application.Main;
 import edu.hitsz.bullet.BaseBullet;
 

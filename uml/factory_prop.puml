@@ -1,0 +1,48 @@
+@startuml
+title:道具工厂方法模式
+
+interface PropFactory {
+    + {abstract} createProp():AbstractProp
+}
+
+class BloodFactory implements PropFactory {
+    createProp():AbstractProp
+}
+
+class BombFactory implements PropFactory {
+    createProp():AbstractProp
+}
+
+class FireFactory implements PropFactory {
+    createProp():AbstractProp
+}
+
+abstract class AbstractProp {
+    + AbstractProp(int locationX, int locationY, int speedX, int speedY)
+    + forward():void
+    + {abstract} activate(HeroAircraft hero):void
+}
+
+class FireProp extends AbstractProp{
+    + FireProp(int locationX, int locationY, int speedX, int speedY)
+    + activate(HeroAircraft hero):void
+}
+
+class BombProp extends AbstractProp{
+    + BombProp(int locationX, int locationY, int speedX, int speedY)
+    + activate(HeroAircraft hero):void
+}
+
+class BloodProp extends AbstractProp{
+    + BloodProp(int locationX, int locationY, int speedX, int speedY)
+    + activate(HeroAircraft hero):void
+}
+
+BloodProp <.. BloodFactory
+BombProp <.. BombFactory
+FireProp <.. FireFactory
+
+PropFactory <.. Game
+AbstractProp <.. Game
+
+@enduml

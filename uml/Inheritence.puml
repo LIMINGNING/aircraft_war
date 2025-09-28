@@ -36,16 +36,18 @@ abstract class AbstractAircraft
     + {abstract} shoot():List<BaseBullet>
  }
 
-
 class HeroAircraft {
     - shootNum:int
     - power:int
     - direction:int
-    + HeroAircraft(int locationX, int locationY, int speedX, int speedY, int hp)
+    - instance:HeroAircraft
+    - HeroAircraft(int locationX, int locationY, int speedX, int speedY, int hp)
+    + getInstance(int locationX, int locationY, int speedX, int speedY, int hp):HeroAircraft
     + forward():void
     + shoot():List<BaseBullet>
 }
 
+HeroAircraft <-- HeroAircraft
 AbstractAircraft <|-- HeroAircraft
 
 class MobEnemy {

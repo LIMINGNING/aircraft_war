@@ -3,6 +3,7 @@ package edu.hitsz.application;
 import edu.hitsz.aircraft.*;
 import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.basic.AbstractFlyingObject;
+import edu.hitsz.enemy.*;
 import edu.hitsz.prop.*;
 
 import javax.swing.*;
@@ -63,11 +64,15 @@ public class Game extends JPanel {
      */
     private boolean gameOverFlag = false;
 
+    EnemyFactory Elite = new EliteFactory();
+    EnemyFactory Mob = new MobFactory();
+
+    PropFactory Blood = new BloodFactory();
+    PropFactory Bomb = new BombFactory();
+    PropFactory Fire = new FireFactory();
+
     public Game() {
-        heroAircraft = new HeroAircraft(
-                Main.WINDOW_WIDTH / 2,
-                Main.WINDOW_HEIGHT - ImageManager.HERO_IMAGE.getHeight(),
-                0, 0, 100);
+        heroAircraft = HeroAircraft.getHeroAircraft();
 
         enemyAircrafts = new LinkedList<>();
         heroBullets = new LinkedList<>();
@@ -102,19 +107,9 @@ public class Game extends JPanel {
                 if (enemyAircrafts.size() < enemyMaxNumber) {
                     // 随机生成普通敌机或精英敌机
                     if (Math.random() < 0.8) { // 80% 概率生成普通敌机
-                        enemyAircrafts.add(new MobEnemy(
-                                (int) (Math.random() * (Main.WINDOW_WIDTH - ImageManager.MOB_ENEMY_IMAGE.getWidth())),
-                                (int) (Math.random() * Main.WINDOW_HEIGHT * 0.05),
-                                0,
-                                10,
-                                30));
+                        enemyAircrafts.add(Mob.createEnemy());
                     } else { // 20% 概率生成精英敌机
-                        enemyAircrafts.add(new EliteEnemy(
-                                (int) (Math.random() * (Main.WINDOW_WIDTH - ImageManager.ELITE_ENEMY_IMAGE.getWidth())),
-                                (int) (Math.random() * Main.WINDOW_HEIGHT * 0.05),
-                                5,
-                                10,
-                                30));
+                        enemyAircrafts.add(Elite.createEnemy());
                     }
                 }
                 // 飞机射出子弹
@@ -365,13 +360,13 @@ public class Game extends JPanel {
             double propType = Math.random();
             if (propType < 0.4) {
                 // 40% 概率生成加血道具
-                prop = new BloodProp(x, y, 0, 5);
+                prop = Blood.createProp(x,y);
             } else if (propType < 0.7) {
                 // 30% 概率生成火力道具
-                prop = new FireProp(x, y, 0, 5);
+                prop = Fire.createProp(x,y);
             } else {
                 // 30% 概率生成炸弹道具
-                prop = new BombProp(x, y, 0, 5);
+                prop = Bomb.createProp(x,y);
             }
             props.add(prop);
         }

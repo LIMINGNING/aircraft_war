@@ -1,0 +1,47 @@
+@startuml
+title:敌机工厂方法模式
+
+interface EnemyFactory {
+    + {abstract} createEnemy():AbstractAircraft
+}
+
+class MobFactory implements EnemyFactory{
+    + createEnemy():AbstractAircraft
+}
+
+class EliteFactory implements EnemyFactory{
+    + createEnemy():AbstractAircraft
+}
+
+abstract class AbstractAircraft
+{
+	# maxHp:int
+    # hp:int
+    + AbstractAircraft(int locationX, int locationY, int speedX, int speedY, int hp)
+    + decreaseHp(int decrease):void
+    + getHp():int
+    + {abstract} shoot():List<BaseBullet>
+ }
+
+class MobEnemy extends AbstractAircraft{
+    + MobEnemy(int locationX, int locationY, int speedX, int speedY, int hp)
+    + forward():void
+    + shoot():List<BaseBullet>
+}
+
+class EliteEnemy extends AbstractAircraft{
+    - shootNum:int
+    - power:int
+    - direction:int
+
+    + EliteEnemy(int locationX, int locationY, int speedX, int speedY, int hp)
+    + forward():void
+    + shoot():List<BaseBullet>
+}
+
+MobEnemy <.. MobFactory:<<create>>
+EliteEnemy <.. EliteFactory:<<create>>
+EnemyFactory <.. Game
+AbstractAircraft <.. Game
+
+@enduml

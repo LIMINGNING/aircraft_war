@@ -32,16 +32,16 @@ public abstract class AbstractAircraft extends AbstractFlyingObject {
         }
     }
 
-    public int getHp() {
-        return hp;
-    }
-
     public void increaseHp(int hp) {
         if (this.hp + hp >= maxHp) {
             this.hp = maxHp;
         } else {
             this.hp += hp;
         }
+    }
+
+    public int getHp() {
+        return hp;
     }
 
     /**

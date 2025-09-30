@@ -6,15 +6,15 @@ interface PropFactory {
 }
 
 class BloodFactory implements PropFactory {
-    createProp():AbstractProp
+    + createProp():AbstractProp
 }
 
 class BombFactory implements PropFactory {
-    createProp():AbstractProp
+    + createProp():AbstractProp
 }
 
 class FireFactory implements PropFactory {
-    createProp():AbstractProp
+    + createProp():AbstractProp
 }
 
 abstract class AbstractProp {

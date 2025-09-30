@@ -3,6 +3,7 @@ package edu.hitsz.enemy;
 import edu.hitsz.aircraft.AbstractAircraft;
 import edu.hitsz.application.Main;
 import edu.hitsz.bullet.BaseBullet;
+import edu.hitsz.prop.AbstractProp;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -13,10 +14,19 @@ import java.util.List;
  *
  * @author hitsz
  */
-public class MobEnemy extends AbstractAircraft {
+public class MobEnemy extends EnemyAircraft {
 
     public MobEnemy(int locationX, int locationY, int speedX, int speedY, int hp) {
         super(locationX, locationY, speedX, speedY, hp);
+    }
+
+    @Override
+    public void generateProp(int x, int y, List<AbstractProp> props) {
+    }
+
+    @Override
+    public int getScore() {
+        return 10;
     }
 
     @Override

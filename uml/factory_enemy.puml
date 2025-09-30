@@ -2,34 +2,33 @@
 title:敌机工厂方法模式
 
 interface EnemyFactory {
-    + {abstract} createEnemy():AbstractAircraft
+    + {abstract} createEnemy():EnemyAircraft
 }
 
 class MobFactory implements EnemyFactory{
-    + createEnemy():AbstractAircraft
+    + createEnemy():EnemyAircraft
 }
 
 class EliteFactory implements EnemyFactory{
-    + createEnemy():AbstractAircraft
+    + createEnemy():EnemyAircraft
 }
 
-abstract class AbstractAircraft
+abstract class EnemyAircraft
 {
-	# maxHp:int
-    # hp:int
-    + AbstractAircraft(int locationX, int locationY, int speedX, int speedY, int hp)
-    + decreaseHp(int decrease):void
-    + getHp():int
-    + {abstract} shoot():List<BaseBullet>
+    + EnemyAircraft(int locationX, int locationY, int speedX, int speedY, int hp)
+    + {abstract} generateProp(int x, int y, List<AbstractProp> props):void
+    + {abstract} getScore():int
  }
 
-class MobEnemy extends AbstractAircraft{
+class MobEnemy extends EnemyAircraft{
     + MobEnemy(int locationX, int locationY, int speedX, int speedY, int hp)
     + forward():void
     + shoot():List<BaseBullet>
+    + generateProp(int x, int y, List<AbstractProp> props):void
+    + getScore():int
 }
 
-class EliteEnemy extends AbstractAircraft{
+class EliteEnemy extends EnemyAircraft{
     - shootNum:int
     - power:int
     - direction:int
@@ -37,11 +36,13 @@ class EliteEnemy extends AbstractAircraft{
     + EliteEnemy(int locationX, int locationY, int speedX, int speedY, int hp)
     + forward():void
     + shoot():List<BaseBullet>
+    + generateProp(int x, int y, List<AbstractProp> props):void
+    + getScore():int
 }
 
 MobEnemy <.. MobFactory:<<create>>
 EliteEnemy <.. EliteFactory:<<create>>
 EnemyFactory <.. Game
-AbstractAircraft <.. Game
+EnemyAircraft <.. Game
 
 @enduml

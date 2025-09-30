@@ -33,10 +33,12 @@ public class Game extends JPanel {
     private int timeInterval = 40;
 
     private final HeroAircraft heroAircraft;
-    private final List<AbstractAircraft> enemyAircrafts;
+    private final List<EnemyAircraft> enemyAircrafts;
     private final List<BaseBullet> heroBullets;
     private final List<BaseBullet> enemyBullets;
     private final List<AbstractProp> props;
+    private EnemyFactory enemyFactory;
+    private EnemyAircraft enemyAircraft;
 
     /**
      * 屏幕中出现的敌机最大数量
@@ -64,13 +66,6 @@ public class Game extends JPanel {
      */
     private boolean gameOverFlag = false;
 
-    EnemyFactory Elite = new EliteFactory();
-    EnemyFactory Mob = new MobFactory();
-
-    PropFactory Blood = new BloodFactory();
-    PropFactory Bomb = new BombFactory();
-    PropFactory Fire = new FireFactory();
-
     public Game() {
         heroAircraft = HeroAircraft.getHeroAircraft();
 
@@ -78,7 +73,6 @@ public class Game extends JPanel {
         heroBullets = new LinkedList<>();
         enemyBullets = new LinkedList<>();
         props = new LinkedList<>();
-
         /**
          * Scheduled 线程池，用于定时任务调度
          */
@@ -93,7 +87,6 @@ public class Game extends JPanel {
      * 游戏启动入口，执行游戏逻辑
      */
     public void action() {
-
         // 定时任务：绘制、对象产生、碰撞判定、击毁及结束判定
         Runnable task = () -> {
 
@@ -103,13 +96,16 @@ public class Game extends JPanel {
             if (timeCountAndNewCycleJudge()) {
                 System.out.println(time);
                 // 新敌机产生
-
                 if (enemyAircrafts.size() < enemyMaxNumber) {
                     // 随机生成普通敌机或精英敌机
                     if (Math.random() < 0.8) { // 80% 概率生成普通敌机
-                        enemyAircrafts.add(Mob.createEnemy());
+                        enemyFactory = new MobFactory();
+                        enemyAircraft = enemyFactory.createEnemy();
+                        enemyAircrafts.add(enemyAircraft);
                     } else { // 20% 概率生成精英敌机
-                        enemyAircrafts.add(Elite.createEnemy());
+                        enemyFactory = new EliteFactory();
+                        enemyAircraft = enemyFactory.createEnemy();
+                        enemyAircrafts.add(enemyAircraft);
                     }
                 }
                 // 飞机射出子弹
@@ -227,7 +223,7 @@ public class Game extends JPanel {
             if (bullet.notValid()) {
                 continue;
             }
-            for (AbstractAircraft enemyAircraft : enemyAircrafts) {
+            for (EnemyAircraft enemyAircraft : enemyAircrafts) {
                 if (enemyAircraft.notValid()) {
                     // 已被其他子弹击毁的敌机，不再检测
                     // 避免多个子弹重复击毁同一敌机的判定
@@ -240,13 +236,8 @@ public class Game extends JPanel {
                     bullet.vanish();
                     if (enemyAircraft.notValid()) {
                         // 获得分数，产生道具补给
-                        if (enemyAircraft instanceof EliteEnemy) {
-                            score += 20; // 精英敌机分数更高
-                            // 精英敌机坠毁后随机产生道具
-                            generateProp(enemyAircraft.getLocationX(), enemyAircraft.getLocationY());
-                        } else {
-                            score += 10;
-                        }
+                        enemyAircraft.generateProp(enemyAircraft.getLocationX(), enemyAircraft.getLocationY(),props);
+                        score += enemyAircraft.getScore();
                     }
                 }
                 // 英雄机 与 敌机 相撞，均损毁
@@ -345,31 +336,6 @@ public class Game extends JPanel {
         g.drawString("SCORE:" + this.score, x, y);
         y = y + 20;
         g.drawString("LIFE:" + this.heroAircraft.getHp(), x, y);
-    }
-
-    /**
-     * 生成道具
-     * 
-     * @param x 道具的x坐标
-     * @param y 道具的y坐标
-     */
-    private void generateProp(int x, int y) {
-        double random = Math.random();
-        if (random < 0.8) { // 80% 概率生成道具
-            AbstractProp prop;
-            double propType = Math.random();
-            if (propType < 0.4) {
-                // 40% 概率生成加血道具
-                prop = Blood.createProp(x,y);
-            } else if (propType < 0.7) {
-                // 30% 概率生成火力道具
-                prop = Fire.createProp(x,y);
-            } else {
-                // 30% 概率生成炸弹道具
-                prop = Bomb.createProp(x,y);
-            }
-            props.add(prop);
-        }
     }
 
 }

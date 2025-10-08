@@ -60,11 +60,19 @@ public class Game extends JPanel {
      */
     private int cycleDuration = 600;
     private int cycleTime = 0;
+    private int cycleTimeEnemyShoot = 0;
 
     /**
      * 游戏结束标志
      */
     private boolean gameOverFlag = false;
+
+    /**
+     * Boss出现分数阈值和Boss存活标志
+     */
+    private int bossAppearScoreThreshold = 300;
+    private int scoreBuff = 0;
+    private boolean bossActive = false;
 
     public Game() {
         heroAircraft = HeroAircraft.getHeroAircraft();
@@ -89,8 +97,15 @@ public class Game extends JPanel {
     public void action() {
         // 定时任务：绘制、对象产生、碰撞判定、击毁及结束判定
         Runnable task = () -> {
-
             time += timeInterval;
+
+            // Boss生成逻辑（只用bossActive）
+            if (!bossActive && scoreBuff >= bossAppearScoreThreshold) {
+                enemyFactory = new BossFactory();
+                enemyAircraft = enemyFactory.createEnemy();
+                enemyAircrafts.add(enemyAircraft);
+                bossActive = true;
+            }
 
             // 周期性执行（控制频率）
             if (timeCountAndNewCycleJudge()) {
@@ -98,18 +113,27 @@ public class Game extends JPanel {
                 // 新敌机产生
                 if (enemyAircrafts.size() < enemyMaxNumber) {
                     // 随机生成普通敌机或精英敌机
-                    if (Math.random() < 0.8) { // 80% 概率生成普通敌机
+                    if (Math.random() < 0.6) { // 80% 概率生成普通敌机
                         enemyFactory = new MobFactory();
                         enemyAircraft = enemyFactory.createEnemy();
                         enemyAircrafts.add(enemyAircraft);
-                    } else { // 20% 概率生成精英敌机
+                    } else if (Math.random() > 0.6 && Math.random() < 0.8) { // 20% 概率生成精英敌机
                         enemyFactory = new EliteFactory();
                         enemyAircraft = enemyFactory.createEnemy();
                         enemyAircrafts.add(enemyAircraft);
                     }
+                    else {
+                        enemyFactory = new SuperEliteEnemyFactory();
+                        enemyAircraft = enemyFactory.createEnemy();
+                        enemyAircrafts.add(enemyAircraft);
+                    }
                 }
-                // 飞机射出子弹
-                shootAction();
+                // 英雄机射出子弹
+                heroShootAction();
+            }
+
+            if (enemyCountAndNewCycleJudge()) {
+                enemyShootAction();
             }
 
             // 子弹移动
@@ -163,14 +187,27 @@ public class Game extends JPanel {
         }
     }
 
-    private void shootAction() {
+    private boolean enemyCountAndNewCycleJudge() {
+        cycleTimeEnemyShoot += timeInterval;
+        if (cycleTimeEnemyShoot >= cycleDuration*2) {
+            // 跨越到新的周期
+            cycleTimeEnemyShoot %= cycleDuration*2;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private void heroShootAction() {
+        // 英雄射击
+        heroBullets.addAll(heroAircraft.shoot());
+    }
+
+    private void enemyShootAction() {
         // TODO 敌机射击
         for (AbstractAircraft enemyAircraft : enemyAircrafts) {
             enemyBullets.addAll(enemyAircraft.shoot());
         }
-
-        // 英雄射击
-        heroBullets.addAll(heroAircraft.shoot());
     }
 
     private void bulletsMoveAction() {
@@ -238,6 +275,7 @@ public class Game extends JPanel {
                         // 获得分数，产生道具补给
                         enemyAircraft.generateProp(enemyAircraft.getLocationX(), enemyAircraft.getLocationY(),props);
                         score += enemyAircraft.getScore();
+                        scoreBuff += enemyAircraft.getScore();
                     }
                 }
                 // 英雄机 与 敌机 相撞，均损毁
@@ -274,6 +312,20 @@ public class Game extends JPanel {
         heroBullets.removeIf(AbstractFlyingObject::notValid);
         enemyAircrafts.removeIf(AbstractFlyingObject::notValid);
         props.removeIf(AbstractFlyingObject::notValid);
+        // 检查Boss是否死亡（只用bossActive）
+        if (bossActive) {
+            boolean bossStillAlive = false;
+            for (EnemyAircraft ea : enemyAircrafts) {
+                if (ea instanceof Boss) {
+                    bossStillAlive = true;
+                    break;
+                }
+            }
+            if (!bossStillAlive) {
+                bossActive = false;
+                scoreBuff = 0;
+            }
+        }
     }
 
     // ***********************

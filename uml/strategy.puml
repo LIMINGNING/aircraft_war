@@ -1,0 +1,40 @@
+@startuml
+
+interface ShootStrategy {
+    + {abstract} shoot(AbstractAircraft aircraft, int direction, int shootNum, int power):List<BaseBullet>
+}
+
+class DirectShoot implements ShootStrategy {
+    - direction:int
+    + shoot(AbstractAircraft aircraft, int direction, int shootNum, int power):List<BaseBullet>
+}
+
+class ScatterShoot implements ShootStrategy {
+    - direction:int
+    + shoot(AbstractAircraft aircraft, int direction, int shootNum, int power):List<BaseBullet>
+}
+
+class RingShapedShoot implements ShootStrategy {
+    + shoot(AbstractAircraft aircraft, int direction, int shootNum, int power):List<BaseBullet>
+}
+
+class AbstractAircraft {
+    - locationX:int
+    - locationY:int
+    - speedX:int
+    - speedY:int
+    - hp:int
+    - strategy:Strategy
+    + abstractAircraft(ShootStrategy shootStrategy, int locationX, int locationY, int speedX, int speedY, int hp)
+    + forward():void
+    + setStrategy(Strategy strategy):void
+    + executeShoot():List<BaseBullet>
+}
+
+class client {
+}
+
+AbstractAircraft o--> ShootStrategy
+client ..> AbstractAircraft
+
+@enduml

@@ -5,6 +5,7 @@ import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.basic.AbstractFlyingObject;
 import edu.hitsz.enemy.*;
 import edu.hitsz.prop.*;
+import edu.hitsz.dao.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -74,6 +75,11 @@ public class Game extends JPanel {
     private int scoreBuff = 0;
     private boolean bossActive = false;
 
+    /**
+     * 得分数据访问对象
+     */
+    private ScoreDao scoreDao;
+
     public Game() {
         heroAircraft = HeroAircraft.getHeroAircraft();
 
@@ -81,6 +87,10 @@ public class Game extends JPanel {
         heroBullets = new LinkedList<>();
         enemyBullets = new LinkedList<>();
         props = new LinkedList<>();
+
+        // 初始化得分DAO
+        scoreDao = new ScoreDaoImpl();
+
         /**
          * Scheduled 线程池，用于定时任务调度
          */
@@ -121,8 +131,7 @@ public class Game extends JPanel {
                         enemyFactory = new EliteFactory();
                         enemyAircraft = enemyFactory.createEnemy();
                         enemyAircrafts.add(enemyAircraft);
-                    }
-                    else {
+                    } else {
                         enemyFactory = new SuperEliteEnemyFactory();
                         enemyAircraft = enemyFactory.createEnemy();
                         enemyAircrafts.add(enemyAircraft);
@@ -160,6 +169,9 @@ public class Game extends JPanel {
                 executorService.shutdown();
                 gameOverFlag = true;
                 System.out.println("Game Over!");
+
+                // 记录得分并显示排行榜
+                recordScoreAndShowLeaderboard();
             }
 
         };
@@ -189,9 +201,9 @@ public class Game extends JPanel {
 
     private boolean enemyCountAndNewCycleJudge() {
         cycleTimeEnemyShoot += timeInterval;
-        if (cycleTimeEnemyShoot >= cycleDuration*2) {
+        if (cycleTimeEnemyShoot >= cycleDuration * 2) {
             // 跨越到新的周期
-            cycleTimeEnemyShoot %= cycleDuration*2;
+            cycleTimeEnemyShoot %= cycleDuration * 2;
             return true;
         } else {
             return false;
@@ -273,7 +285,7 @@ public class Game extends JPanel {
                     bullet.vanish();
                     if (enemyAircraft.notValid()) {
                         // 获得分数，产生道具补给
-                        enemyAircraft.generateProp(enemyAircraft.getLocationX(), enemyAircraft.getLocationY(),props);
+                        enemyAircraft.generateProp(enemyAircraft.getLocationX(), enemyAircraft.getLocationY(), props);
                         score += enemyAircraft.getScore();
                         scoreBuff += enemyAircraft.getScore();
                     }
@@ -388,6 +400,43 @@ public class Game extends JPanel {
         g.drawString("SCORE:" + this.score, x, y);
         y = y + 20;
         g.drawString("LIFE:" + this.heroAircraft.getHp(), x, y);
+    }
+
+    /**
+     * 记录得分并显示排行榜
+     */
+    private void recordScoreAndShowLeaderboard() {
+        // 记录当前得分
+        ScoreRecord record = new ScoreRecord("testUserName", score);
+        scoreDao.updateScore(record);
+
+        // 显示排行榜
+        showLeaderboard();
+    }
+
+    /**
+     * 在控制台显示得分排行榜
+     */
+    private void showLeaderboard() {
+        System.out.println("\n==================== 得分排行榜 ====================");
+        List<ScoreRecord> topScores = scoreDao.getTopScores(10); // 显示前10名
+
+        if (topScores.isEmpty()) {
+            System.out.println("暂无得分记录");
+        } else {
+            System.out.printf("%-6s%-15s%-10s%-20s%n", "名次", "玩家名", "得分", "记录时间");
+            System.out.println("================================================");
+
+            for (int i = 0; i < topScores.size(); i++) {
+                ScoreRecord record = topScores.get(i);
+                System.out.printf("%-6d%-15s%-10d%-20s%n",
+                        i + 1,
+                        record.getPlayerName(),
+                        record.getScore(),
+                        record.getFormattedTime());
+            }
+        }
+        System.out.println("==================================================\n");
     }
 
 }

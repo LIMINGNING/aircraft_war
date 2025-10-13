@@ -5,6 +5,7 @@ import edu.hitsz.application.Main;
 import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.bullet.EnemyBullet;
 import edu.hitsz.prop.*;
+import edu.hitsz.strategy.ShootStrategy;
 
 import java.security.PrivateKey;
 import java.util.LinkedList;
@@ -14,8 +15,8 @@ public class EliteEnemy extends EnemyAircraft {
     private int power = 10;
     private int direction = 1;
 
-    public EliteEnemy(int locationX, int locationY, int speedX, int speedY, int hp) {
-        super(locationX, locationY, speedX, speedY, hp);
+    public EliteEnemy(ShootStrategy shootStrategy, int locationX, int locationY, int speedX, int speedY, int hp) {
+        super(shootStrategy, locationX, locationY, speedX, speedY, hp);
     }
 
     @Override
@@ -25,17 +26,17 @@ public class EliteEnemy extends EnemyAircraft {
             double propType = Math.random();
             PropFactory propFactory;
             AbstractProp abstractProp;
-            if (propType < 0.4) {
-                // 40% 概率生成加血道具
+            if (propType < 0.25) {
                 propFactory = new BloodFactory();
-                abstractProp = propFactory.createProp(x, y);
-            } else if (propType < 0.7) {
-                // 30% 概率生成火力道具
+                abstractProp = propFactory.createProp(x, y); // 道具纵向错开
+            } else if (propType < 0.5) {
                 propFactory = new FireFactory();
                 abstractProp = propFactory.createProp(x, y);
-            } else {
-                // 30% 概率生成炸弹道具
+            } else if (propType < 0.75) {
                 propFactory = new BombFactory();
+                abstractProp = propFactory.createProp(x, y);
+            } else {
+                propFactory = new FirePlusPropFactory();
                 abstractProp = propFactory.createProp(x, y);
             }
             props.add(abstractProp);
@@ -63,13 +64,6 @@ public class EliteEnemy extends EnemyAircraft {
      * @return 射击出的子弹List
      */
     public List<BaseBullet> shoot() {
-        List<BaseBullet> res = new LinkedList<>();
-        int x = this.getLocationX();
-        int y = this.getLocationY() + direction * 2;
-        int speedY = this.getSpeedY() + direction * 5;
-        int speedX = 0;
-        BaseBullet bullet = new EnemyBullet(x, y, speedX, speedY, power);
-        res.add(bullet);
-        return res;
+        return this.executeShoot(direction, 1, power);
     }
 }

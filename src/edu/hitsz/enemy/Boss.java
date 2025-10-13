@@ -4,15 +4,17 @@ import edu.hitsz.application.Main;
 import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.bullet.EnemyBullet;
 import edu.hitsz.prop.*;
+import edu.hitsz.strategy.ShootStrategy;
 
 import java.util.LinkedList;
 import java.util.List;
 
 public class Boss extends EnemyAircraft{
+    private int shootNum = 20;
     private int power = 10;
 
-    public Boss(int locationX, int locationY, int speedX, int speedY, int hp) {
-        super(locationX, locationY, speedX, speedY, hp);
+    public Boss(ShootStrategy shootStrategy, int locationX, int locationY, int speedX, int speedY, int hp) {
+        super(shootStrategy, locationX, locationY, speedX, speedY, hp);
     }
 
     @Override
@@ -28,14 +30,17 @@ public class Boss extends EnemyAircraft{
                 double propType = Math.random();
                 PropFactory propFactory;
                 AbstractProp abstractProp;
-                if (propType < 0.4) {
+                if (propType < 0.25) {
                     propFactory = new BloodFactory();
                     abstractProp = propFactory.createProp(x, y + i * 30); // 道具纵向错开
-                } else if (propType < 0.7) {
+                } else if (propType < 0.5) {
                     propFactory = new FireFactory();
                     abstractProp = propFactory.createProp(x, y + i * 30);
-                } else {
+                } else if (propType < 0.75) {
                     propFactory = new BombFactory();
+                    abstractProp = propFactory.createProp(x, y + i * 30);
+                } else {
+                    propFactory = new FirePlusPropFactory();
                     abstractProp = propFactory.createProp(x, y + i * 30);
                 }
                 props.add(abstractProp);
@@ -54,18 +59,6 @@ public class Boss extends EnemyAircraft{
      * @return 射击出的子弹List
      */
     public List<BaseBullet> shoot() {
-        List<BaseBullet> res = new LinkedList<>();
-        int x = this.getLocationX();
-        int y = this.getLocationY();
-        int bulletNum = 20;
-        double speed = 5;
-        for (int i = 0; i < bulletNum; i++) {
-            double angle = 2 * Math.PI * i / bulletNum;
-            int speedX = (int) Math.round(speed * Math.cos(angle));
-            int speedY = (int) Math.round(speed * Math.sin(angle));
-            BaseBullet bullet = new EnemyBullet(x, y, speedX, speedY, power);
-            res.add(bullet);
-        }
-        return res;
+        return this.executeShoot(0,shootNum, power);
     }
 }

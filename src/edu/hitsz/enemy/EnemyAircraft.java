@@ -7,12 +7,13 @@ import edu.hitsz.prop.BloodFactory;
 import edu.hitsz.prop.BombFactory;
 import edu.hitsz.prop.FireFactory;
 import edu.hitsz.prop.*;
+import edu.hitsz.strategy.ShootStrategy;
 
 import java.util.List;
 
 public abstract class EnemyAircraft extends AbstractAircraft {
-    public EnemyAircraft(int locationX, int locationY, int speedX, int speedY, int hp) {
-        super(locationX, locationY, speedX, speedY, hp);
+    public EnemyAircraft(ShootStrategy shootStrategy, int locationX, int locationY, int speedX, int speedY, int hp) {
+        super(shootStrategy, locationX, locationY, speedX, speedY, hp);
     }
 
     /**

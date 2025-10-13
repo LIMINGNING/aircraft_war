@@ -1,0 +1,60 @@
+@startuml
+
+title DAO模式类图 - 得分排行榜系统
+
+' Value Object - 数据实体类
+class ScoreRecord {
+    - playerName: String
+    - score: int  
+    - recordTime: LocalDateTime
+    + ScoreRecord(playerName: String, score: int)
+    + ScoreRecord(playerName: String, score: int, recordTime: LocalDateTime)
+    + getPlayerName(): String
+    + setPlayerName(playerName: String): void
+    + getScore(): int
+    + setScore(score: int): void
+    + getRecordTime(): LocalDateTime
+    + setRecordTime(recordTime: LocalDateTime): void
+    + getFormattedTime(): String
+    + toFileString(): String
+    + {static} fromFileString(line: String): ScoreRecord
+    + toString(): String
+}
+
+' DAO Interface - 数据访问接口
+interface ScoreDao {
+    + updateScore(record: ScoreRecord): void
+    + getAllScores(): List<ScoreRecord>
+    + getTopScores(n: int): List<ScoreRecord>
+    + deleteScore(index: int): boolean
+    + clearAllScores(): void
+}
+
+' DAO Implementation - 数据访问实现类
+class ScoreDaoImpl {
+    - {static} SCORE_FILE_PATH: String = "scores.txt"
+    - scoreRecords: List<ScoreRecord>
+    + ScoreDaoImpl()
+    + updateScore(record: ScoreRecord): void
+    + getAllScores(): List<ScoreRecord>
+    + getTopScores(n: int): List<ScoreRecord>
+    + deleteScore(index: int): boolean
+    + clearAllScores(): void
+    - loadScoresFromFile(): void
+    - saveScoresToFile(): void
+}
+
+class Game {
+    - scoreDao: ScoreDao
+    - score: int
+    + Game()
+    - recordScoreAndShowLeaderboard(): void
+    - showLeaderboard(): void
+}
+
+' 关系定义
+ScoreDaoImpl ..|> ScoreDao : implements
+ScoreDaoImpl --> ScoreRecord : uses
+Game --> ScoreDao
+
+@enduml

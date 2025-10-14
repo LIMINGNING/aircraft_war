@@ -19,7 +19,7 @@ import java.util.concurrent.*;
  *
  * @author hitsz
  */
-public class Game extends JPanel {
+public class BaseGame extends JPanel {
 
     private int backGroundTop = 0;
 
@@ -40,6 +40,7 @@ public class Game extends JPanel {
     private final List<AbstractProp> props;
     private EnemyFactory enemyFactory;
     private EnemyAircraft enemyAircraft;
+    protected BufferedImage backgroundImage;
 
     /**
      * 屏幕中出现的敌机最大数量
@@ -80,7 +81,7 @@ public class Game extends JPanel {
      */
     private ScoreDao scoreDao;
 
-    public Game() {
+    public BaseGame() {
         heroAircraft = HeroAircraft.getHeroAircraft();
 
         enemyAircrafts = new LinkedList<>();
@@ -356,8 +357,8 @@ public class Game extends JPanel {
         super.paint(g);
 
         // 绘制背景,图片滚动
-        g.drawImage(ImageManager.BACKGROUND_IMAGE, 0, this.backGroundTop - Main.WINDOW_HEIGHT, null);
-        g.drawImage(ImageManager.BACKGROUND_IMAGE, 0, this.backGroundTop, null);
+        g.drawImage(backgroundImage, 0, this.backGroundTop - Main.WINDOW_HEIGHT, null);
+        g.drawImage(backgroundImage, 0, this.backGroundTop, null);
         this.backGroundTop += 1;
         if (this.backGroundTop == Main.WINDOW_HEIGHT) {
             this.backGroundTop = 0;

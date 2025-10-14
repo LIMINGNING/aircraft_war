@@ -8,7 +8,7 @@ public class BossFactory implements EnemyFactory{
     @Override
     public Boss createEnemy() {
         return new Boss(new RingShapedShoot(), (int) (Math.random() * (Main.WINDOW_WIDTH - ImageManager.BOSS_ENEMY_IMAGE.getWidth())),
-                (int) (Math.random() * Main.WINDOW_HEIGHT * 0.05),
+                (int) (Main.WINDOW_HEIGHT * 0.12),
                 3,
                 0,
                 120);

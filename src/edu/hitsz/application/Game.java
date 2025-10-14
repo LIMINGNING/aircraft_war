@@ -88,6 +88,7 @@ public class Game extends JPanel {
         enemyBullets = new LinkedList<>();
         props = new LinkedList<>();
 
+
         // 初始化得分DAO
         scoreDao = new ScoreDaoImpl();
 

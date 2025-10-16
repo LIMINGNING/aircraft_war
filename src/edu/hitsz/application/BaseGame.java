@@ -1,18 +1,19 @@
 package edu.hitsz.application;
 
 import edu.hitsz.aircraft.*;
-import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.basic.AbstractFlyingObject;
+import edu.hitsz.bullet.BaseBullet;
+import edu.hitsz.dao.*;
 import edu.hitsz.enemy.*;
 import edu.hitsz.prop.*;
-import edu.hitsz.dao.*;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.*;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 
 /**
  * 游戏主面板，游戏启动
@@ -408,37 +409,28 @@ public class BaseGame extends JPanel {
      * 记录得分并显示排行榜
      */
     private void recordScoreAndShowLeaderboard() {
-        // 记录当前得分
-        ScoreRecord record = new ScoreRecord("testUserName", score);
-        scoreDao.updateScore(record);
-
-        // 显示排行榜
-        showLeaderboard();
-    }
-
-    /**
-     * 在控制台显示得分排行榜
-     */
-    private void showLeaderboard() {
-        System.out.println("\n==================== 得分排行榜 ====================");
-        List<ScoreRecord> topScores = scoreDao.getTopScores(10); // 显示前10名
-
-        if (topScores.isEmpty()) {
-            System.out.println("暂无得分记录");
+        // 确定得分文件名和难度
+        String scoreFileName;
+        String difficulty;
+        
+        if (this instanceof SimpleGame) {
+            scoreFileName = "scores_simple.txt";
+            difficulty = "简单";
+        } else if (this instanceof MiddleGame) {
+            scoreFileName = "scores_middle.txt";
+            difficulty = "中等";
+        } else if (this instanceof HardGame) {
+            scoreFileName = "scores_hard.txt";
+            difficulty = "困难";
         } else {
-            System.out.printf("%-6s%-15s%-10s%-20s%n", "名次", "玩家名", "得分", "记录时间");
-            System.out.println("================================================");
-
-            for (int i = 0; i < topScores.size(); i++) {
-                ScoreRecord record = topScores.get(i);
-                System.out.printf("%-6d%-15s%-10d%-20s%n",
-                        i + 1,
-                        record.getPlayerName(),
-                        record.getScore(),
-                        record.getFormattedTime());
-            }
+            scoreFileName = "scores.txt";
+            difficulty = "未知";
         }
-        System.out.println("==================================================\n");
+        
+        // 创建并显示游戏结束界面
+        GameOverScreen gameOverScreen = new GameOverScreen(score, difficulty, scoreFileName);
+        Main.cardPanel.add(gameOverScreen.getMainPanel(), "gameOver");
+        Main.cardLayout.show(Main.cardPanel, "gameOver");
     }
 
 }

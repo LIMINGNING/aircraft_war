@@ -1,7 +1,5 @@
 package edu.hitsz.application;
 
-import edu.hitsz.StartMenu;
-
 import javax.swing.*;
 import java.awt.*;
 

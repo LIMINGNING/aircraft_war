@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="edu.hitsz.application.GameOverScreen">
+  <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="6" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="20" left="20" bottom="20" right="20"/>
+    <constraints>
+      <xy x="20" y="20" width="512" height="768"/>
+    </constraints>
+    <properties>
+      <background color="-6579301"/>
+    </properties>
+    <border type="none"/>
+    <children>
+      <component id="c9b16" class="javax.swing.JLabel" binding="difficultyLabel">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="-1" height="30"/>
+          </grid>
+        </constraints>
+        <properties>
+          <font name="SimHei" size="20" style="1"/>
+          <foreground color="-1"/>
+          <horizontalAlignment value="0"/>
+          <text value="难度: "/>
+        </properties>
+      </component>
+      <component id="89c37" class="javax.swing.JLabel" binding="scoreLabel">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="-1" height="30"/>
+          </grid>
+        </constraints>
+        <properties>
+          <font name="SimHei" size="24" style="1"/>
+          <foreground color="-256"/>
+          <horizontalAlignment value="0"/>
+          <text value="您的得分: "/>
+        </properties>
+      </component>
+      <grid id="inputPanel" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
+        <constraints>
+          <grid row="2" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <preferred-size width="-1" height="50"/>
+          </grid>
+        </constraints>
+        <properties>
+          <background color="-6579301"/>
+        </properties>
+        <border type="none"/>
+        <children>
+          <component id="nameLabel" class="javax.swing.JLabel">
+            <constraints/>
+            <properties>
+              <font name="SimHei" size="16" style="1"/>
+              <foreground color="-1"/>
+              <text value="姓名:"/>
+            </properties>
+          </component>
+          <component id="nameField" class="javax.swing.JTextField" binding="nameTextField">
+            <constraints/>
+            <properties>
+              <columns value="15"/>
+              <font name="SimHei" size="16"/>
+              <text value="请输入您的姓名"/>
+            </properties>
+          </component>
+          <component id="saveBtn" class="javax.swing.JButton" binding="saveScoreButton">
+            <constraints/>
+            <properties>
+              <background color="-16724736"/>
+              <font name="SimHei" size="16" style="1"/>
+              <foreground color="-1"/>
+              <text value="保存得分"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <component id="rankingLabel" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="3" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="-1" height="30"/>
+          </grid>
+        </constraints>
+        <properties>
+          <font name="SimHei" size="20" style="1"/>
+          <foreground color="-1"/>
+          <horizontalAlignment value="0"/>
+          <text value="得分排行榜"/>
+        </properties>
+      </component>
+      <scrollpane id="tableScroll" binding="scrollPane">
+        <constraints>
+          <grid row="4" column="0" row-span="1" col-span="2" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <preferred-size width="450" height="300"/>
+          </grid>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="scoreTable" class="javax.swing.JTable" binding="scoreTable">
+            <constraints/>
+            <properties>
+              <font name="SimHei" size="14"/>
+              <rowHeight value="25"/>
+            </properties>
+          </component>
+        </children>
+      </scrollpane>
+      <grid id="buttonPanel" layout-manager="FlowLayout" hgap="10" vgap="5" flow-align="1">
+        <constraints>
+          <grid row="5" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <preferred-size width="-1" height="50"/>
+          </grid>
+        </constraints>
+        <properties>
+          <background color="-6579301"/>
+        </properties>
+        <border type="none"/>
+        <children>
+          <component id="deleteBtn" class="javax.swing.JButton" binding="deleteRecordButton">
+            <constraints/>
+            <properties>
+              <background color="-3341535"/>
+              <font name="SimHei" size="16" style="1"/>
+              <foreground color="-1"/>
+              <text value="删除选中记录"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+    </children>
+  </grid>
+</form>

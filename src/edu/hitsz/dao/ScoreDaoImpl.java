@@ -13,13 +13,23 @@ import java.util.List;
  */
 public class ScoreDaoImpl implements ScoreDao {
 
-    private static final String SCORE_FILE_PATH = "scores.txt";
+    private static final String DEFAULT_SCORE_FILE_PATH = "scores.txt";
+    private String scoreFilePath;
     private List<ScoreRecord> scoreRecords;
 
     /**
-     * 构造函数，初始化并从文件加载数据
+     * 构造函数，使用默认文件路径
      */
     public ScoreDaoImpl() {
+        this(DEFAULT_SCORE_FILE_PATH);
+    }
+
+    /**
+     * 构造函数，使用指定文件路径
+     * @param scoreFilePath 得分文件路径
+     */
+    public ScoreDaoImpl(String scoreFilePath) {
+        this.scoreFilePath = scoreFilePath;
         scoreRecords = new ArrayList<>();
         loadScoresFromFile();
     }
@@ -63,7 +73,7 @@ public class ScoreDaoImpl implements ScoreDao {
      * 从文件加载得分记录
      */
     private void loadScoresFromFile() {
-        File file = new File(SCORE_FILE_PATH);
+        File file = new File(scoreFilePath);
         if (!file.exists()) {
             return;
         }
@@ -89,7 +99,7 @@ public class ScoreDaoImpl implements ScoreDao {
      * 将得分记录保存到文件
      */
     private void saveScoresToFile() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(SCORE_FILE_PATH))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(scoreFilePath))) {
             for (ScoreRecord record : scoreRecords) {
                 writer.write(record.toFileString());
                 writer.newLine();

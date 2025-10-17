@@ -186,7 +186,7 @@ public class BaseGame extends JPanel {
                         gameBgm.stopPlaying();
                     if (bossBgm != null)
                         bossBgm.stopPlaying();
-                    MusicThread.playSound("src/videos/game_over_kobe.wav");
+                    MusicThread.playSound("src/videos/game_over.wav");
                 }
 
                 // 记录得分并显示排行榜

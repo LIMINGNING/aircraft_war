@@ -5,6 +5,8 @@ import edu.hitsz.basic.AbstractFlyingObject;
 import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.dao.*;
 import edu.hitsz.enemy.*;
+import edu.hitsz.music.SoundManager;
+import edu.hitsz.music.SoundThread;
 import edu.hitsz.prop.*;
 
 import java.awt.*;
@@ -13,7 +15,6 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.*;
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 
 /**
  * 游戏主面板，游戏启动
@@ -82,6 +83,16 @@ public class BaseGame extends JPanel {
      */
     private ScoreDao scoreDao;
 
+    /**
+     * 游戏背景音乐线程
+     */
+    private SoundThread gameBgm;
+
+    /**
+     * Boss背景音乐线程
+     */
+    private SoundThread bossBgm;
+
     public BaseGame() {
         heroAircraft = HeroAircraft.getHeroAircraft();
 
@@ -89,7 +100,6 @@ public class BaseGame extends JPanel {
         heroBullets = new LinkedList<>();
         enemyBullets = new LinkedList<>();
         props = new LinkedList<>();
-
 
         // 初始化得分DAO
         scoreDao = new ScoreDaoImpl();
@@ -108,6 +118,12 @@ public class BaseGame extends JPanel {
      * 游戏启动入口，执行游戏逻辑
      */
     public void action() {
+        // 开始游戏时启动背景音乐
+        if (SoundManager.isSoundEnabled()) {
+            gameBgm = SoundThread.createLoopSound("src/videos/bgm.wav");
+            gameBgm.start();
+        }
+
         // 定时任务：绘制、对象产生、碰撞判定、击毁及结束判定
         Runnable task = () -> {
             time += timeInterval;
@@ -118,6 +134,14 @@ public class BaseGame extends JPanel {
                 enemyAircraft = enemyFactory.createEnemy();
                 enemyAircrafts.add(enemyAircraft);
                 bossActive = true;
+
+                // Boss出场时切换背景音乐
+                if (SoundManager.isSoundEnabled()) {
+                    // if (gameBgm != null)
+                    //     gameBgm.stopPlay();
+                    bossBgm = SoundThread.createLoopSound("src/videos/bgm_boss.wav");
+                    bossBgm.start();
+                }
             }
 
             // 周期性执行（控制频率）
@@ -172,6 +196,15 @@ public class BaseGame extends JPanel {
                 executorService.shutdown();
                 gameOverFlag = true;
                 System.out.println("Game Over!");
+
+                // 停止背景音乐并播放游戏结束音效
+                if (SoundManager.isSoundEnabled()) {
+                    if (gameBgm != null)
+                        gameBgm.stopPlay();
+                    if (bossBgm != null)
+                        bossBgm.stopPlay();
+                    SoundThread.playOnceSound("src/videos/game_over_kobe.wav");
+                }
 
                 // 记录得分并显示排行榜
                 recordScoreAndShowLeaderboard();
@@ -286,11 +319,27 @@ public class BaseGame extends JPanel {
                     // 敌机损失一定生命值
                     enemyAircraft.decreaseHp(bullet.getPower());
                     bullet.vanish();
+
+                    // 子弹击中敌机音效
+                    if (SoundManager.isSoundEnabled()) {
+                        SoundThread.playOnceSound("src/videos/bullet_hit.wav");
+                    }
+
                     if (enemyAircraft.notValid()) {
                         // 获得分数，产生道具补给
                         enemyAircraft.generateProp(enemyAircraft.getLocationX(), enemyAircraft.getLocationY(), props);
                         score += enemyAircraft.getScore();
                         scoreBuff += enemyAircraft.getScore();
+
+                        // Boss坠毁时切换回游戏背景音乐
+                        if (enemyAircraft instanceof Boss && SoundManager.isSoundEnabled()) {
+                            if (bossBgm != null) {
+                                bossBgm.stopPlay();
+                                bossBgm = null;
+                            }
+                            // gameBgm = SoundThread.createLoopSound("src/videos/bgm.wav");
+                            // gameBgm.start();
+                        }
                     }
                 }
                 // 英雄机 与 敌机 相撞，均损毁
@@ -309,6 +358,16 @@ public class BaseGame extends JPanel {
             if (heroAircraft.crash(prop)) {
                 // 英雄机获得道具
                 prop.vanish();
+
+                // 道具音效（炸弹和其他道具分别处理）
+                if (SoundManager.isSoundEnabled()) {
+                    if (prop instanceof BombProp) {
+                        SoundThread.playOnceSound("src/videos/bomb_explosion.wav");
+                    } else {
+                        SoundThread.playOnceSound("src/videos/get_supply.wav");
+                    }
+                }
+
                 prop.activate(heroAircraft);
             }
         }
@@ -412,7 +471,7 @@ public class BaseGame extends JPanel {
         // 确定得分文件名和难度
         String scoreFileName;
         String difficulty;
-        
+
         if (this instanceof SimpleGame) {
             scoreFileName = "scores_simple.txt";
             difficulty = "简单";
@@ -426,7 +485,7 @@ public class BaseGame extends JPanel {
             scoreFileName = "scores.txt";
             difficulty = "未知";
         }
-        
+
         // 创建并显示游戏结束界面
         GameOverScreen gameOverScreen = new GameOverScreen(score, difficulty, scoreFileName);
         Main.cardPanel.add(gameOverScreen.getMainPanel(), "gameOver");

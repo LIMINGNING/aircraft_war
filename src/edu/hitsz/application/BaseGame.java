@@ -5,8 +5,7 @@ import edu.hitsz.basic.AbstractFlyingObject;
 import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.dao.*;
 import edu.hitsz.enemy.*;
-import edu.hitsz.music.SoundManager;
-import edu.hitsz.music.SoundThread;
+import edu.hitsz.music.MusicThread;
 import edu.hitsz.prop.*;
 
 import java.awt.*;
@@ -67,11 +66,6 @@ public class BaseGame extends JPanel {
     private int cycleTimeEnemyShoot = 0;
 
     /**
-     * 游戏结束标志
-     */
-    private boolean gameOverFlag = false;
-
-    /**
      * Boss出现分数阈值和Boss存活标志
      */
     private int bossAppearScoreThreshold = 300;
@@ -79,19 +73,14 @@ public class BaseGame extends JPanel {
     private boolean bossActive = false;
 
     /**
-     * 得分数据访问对象
-     */
-    private ScoreDao scoreDao;
-
-    /**
      * 游戏背景音乐线程
      */
-    private SoundThread gameBgm;
+    private MusicThread gameBgm;
 
     /**
      * Boss背景音乐线程
      */
-    private SoundThread bossBgm;
+    private MusicThread bossBgm;
 
     public BaseGame() {
         heroAircraft = HeroAircraft.getHeroAircraft();
@@ -100,9 +89,6 @@ public class BaseGame extends JPanel {
         heroBullets = new LinkedList<>();
         enemyBullets = new LinkedList<>();
         props = new LinkedList<>();
-
-        // 初始化得分DAO
-        scoreDao = new ScoreDaoImpl();
 
         /**
          * Scheduled 线程池，用于定时任务调度
@@ -119,9 +105,8 @@ public class BaseGame extends JPanel {
      */
     public void action() {
         // 开始游戏时启动背景音乐
-        if (SoundManager.isSoundEnabled()) {
-            gameBgm = SoundThread.createLoopSound("src/videos/bgm.wav");
-            gameBgm.start();
+        if (MusicThread.isSoundEnabled()) {
+            gameBgm = MusicThread.playBackgroundMusic("src/videos/bgm.wav");
         }
 
         // 定时任务：绘制、对象产生、碰撞判定、击毁及结束判定
@@ -136,11 +121,10 @@ public class BaseGame extends JPanel {
                 bossActive = true;
 
                 // Boss出场时切换背景音乐
-                if (SoundManager.isSoundEnabled()) {
+                if (MusicThread.isSoundEnabled()) {
                     // if (gameBgm != null)
-                    //     gameBgm.stopPlay();
-                    bossBgm = SoundThread.createLoopSound("src/videos/bgm_boss.wav");
-                    bossBgm.start();
+                    // gameBgm.stopPlaying();
+                    bossBgm = MusicThread.playBossMusic("src/videos/bgm_boss.wav");
                 }
             }
 
@@ -194,16 +178,15 @@ public class BaseGame extends JPanel {
             if (heroAircraft.getHp() <= 0) {
                 // 游戏结束
                 executorService.shutdown();
-                gameOverFlag = true;
                 System.out.println("Game Over!");
 
                 // 停止背景音乐并播放游戏结束音效
-                if (SoundManager.isSoundEnabled()) {
+                if (MusicThread.isSoundEnabled()) {
                     if (gameBgm != null)
-                        gameBgm.stopPlay();
+                        gameBgm.stopPlaying();
                     if (bossBgm != null)
-                        bossBgm.stopPlay();
-                    SoundThread.playOnceSound("src/videos/game_over_kobe.wav");
+                        bossBgm.stopPlaying();
+                    MusicThread.playSound("src/videos/game_over_kobe.wav");
                 }
 
                 // 记录得分并显示排行榜
@@ -321,8 +304,8 @@ public class BaseGame extends JPanel {
                     bullet.vanish();
 
                     // 子弹击中敌机音效
-                    if (SoundManager.isSoundEnabled()) {
-                        SoundThread.playOnceSound("src/videos/bullet_hit.wav");
+                    if (MusicThread.isSoundEnabled()) {
+                        MusicThread.playSound("src/videos/bullet_hit.wav");
                     }
 
                     if (enemyAircraft.notValid()) {
@@ -332,13 +315,12 @@ public class BaseGame extends JPanel {
                         scoreBuff += enemyAircraft.getScore();
 
                         // Boss坠毁时切换回游戏背景音乐
-                        if (enemyAircraft instanceof Boss && SoundManager.isSoundEnabled()) {
+                        if (enemyAircraft instanceof Boss && MusicThread.isSoundEnabled()) {
                             if (bossBgm != null) {
-                                bossBgm.stopPlay();
+                                bossBgm.stopPlaying();
                                 bossBgm = null;
                             }
-                            // gameBgm = SoundThread.createLoopSound("src/videos/bgm.wav");
-                            // gameBgm.start();
+                            // gameBgm = MusicThread.playBackgroundMusic("src/videos/bgm_kobe.wav");
                         }
                     }
                 }
@@ -360,11 +342,11 @@ public class BaseGame extends JPanel {
                 prop.vanish();
 
                 // 道具音效（炸弹和其他道具分别处理）
-                if (SoundManager.isSoundEnabled()) {
+                if (MusicThread.isSoundEnabled()) {
                     if (prop instanceof BombProp) {
-                        SoundThread.playOnceSound("src/videos/bomb_explosion.wav");
+                        MusicThread.playSound("src/videos/bomb_explosion.wav");
                     } else {
-                        SoundThread.playOnceSound("src/videos/get_supply.wav");
+                        MusicThread.playSound("src/videos/get_supply.wav");
                     }
                 }
 

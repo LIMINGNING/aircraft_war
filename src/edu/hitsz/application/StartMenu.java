@@ -1,6 +1,6 @@
 package edu.hitsz.application;
 
-import edu.hitsz.music.SoundManager;
+import edu.hitsz.music.MusicThread;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -18,7 +18,7 @@ public class StartMenu {
     public StartMenu() {
         // 默认勾选音效
         musicCheckBox.setSelected(true);
-        SoundManager.setSoundEnabled(true);
+        MusicThread.setSoundEnabled(true);
 
         simpleModeButton.addActionListener(new ActionListener() {
             @Override
@@ -54,7 +54,7 @@ public class StartMenu {
             @Override
             public void itemStateChanged(ItemEvent e) {
                 // 更新音效设置
-                SoundManager.setSoundEnabled(musicCheckBox.isSelected());
+                MusicThread.setSoundEnabled(musicCheckBox.isSelected());
                 System.out.println("音效设置: " + (musicCheckBox.isSelected() ? "开启" : "关闭"));
             }
         });

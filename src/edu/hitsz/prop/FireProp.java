@@ -15,7 +15,6 @@ public class FireProp extends AbstractProp {
 
     @Override
     public void activate(HeroAircraft hero) {
-        System.out.println("FireProp activate");
         long durationMs = 8000L; // 8秒持续时间
 
         // 中断旧效果
